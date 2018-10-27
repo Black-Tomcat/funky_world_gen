@@ -19,15 +19,31 @@ TERRAIN_RANGES = RangeDict({
 })
 
 
-def generate__random_world():
-    for x in range(WORLD_WIDTH):
-        world.append([])
-        for y in range(WORLD_HEIGHT):
-            terrain_height = random.randint(1, 10)
-            terrain_type = TERRAIN_RANGES[terrain_height]
+def generate_world(func):
+    def wrapper():
+        for x in range(WORLD_WIDTH):
+            world.append([])
+            for y in range(WORLD_HEIGHT):
+                world[x].append(func(x, y))
+    return wrapper
 
-            final = terrain_type.create_copy(terrain_height).__dict__
-            world[x].append(final)
+
+@generate_world
+def generate_random_world(*args):
+    terrain_height = random.randint(1, 10)
+    terrain_type = TERRAIN_RANGES[terrain_height]
+
+    final = terrain_type.create_copy(terrain_height).__dict__
+    return final
+
+
+@generate_world
+def generate_gradient_world(x, y):
+    terrain_height = (x + y) / (WORLD_HEIGHT + WORLD_WIDTH) * 10 + 1
+    terrain_type = TERRAIN_RANGES[terrain_height]
+
+    final = terrain_type.create_copy(terrain_height).__dict__
+    return final
 
 
 def return_world():
@@ -43,5 +59,5 @@ def return_world():
 
 
 if __name__ == '__main__':
-    generate__random_world()
+    generate_gradient_world()
     return_world()
